@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["tinjon@gmail.com"]
   spec.description   = %q{Ruby for the Win32 API of Loquendo speech synthesis programs}
   spec.summary       = %q{Ruby API for Loquendo speech synthesis}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/jojje/win32-loquendo"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
