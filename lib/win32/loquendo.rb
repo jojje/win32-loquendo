@@ -117,7 +117,7 @@ module Win32
       end
 
       def render_speech(text, device)
-        text = text.read if text.respon_to? :read
+        text = text.read if text.respond_to? :read
         unless LoqTTS7.ttsRead(@reader_ptr, text, true, false, 0) == 0
           raise LoquendoException, "Failed to playing audio via #{device} library"
         end
