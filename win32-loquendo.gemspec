@@ -6,6 +6,7 @@ require 'win32/loquendo/version'
 Gem::Specification.new do |spec|
   spec.name          = "win32-loquendo"
   spec.version       = Win32::Loquendo::VERSION
+  spec.platform      = Gem::Platform::CURRENT
   spec.authors       = ["Jonas Tingeborn"]
   spec.email         = ["tinjon@gmail.com"]
   spec.description   = %q{Ruby for the Win32 API of Loquendo speech synthesis programs}
@@ -20,6 +21,10 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "ffi"
 
+  spec.rdoc_options += ['-m', 'README.md', '-x', 'lib/win32/(?!loquendo.rb).*',
+                       'lib/win32/loquendo.rb', 'LICENSE', 'README.md']
+
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "yard"
 end

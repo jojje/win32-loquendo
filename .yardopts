@@ -1,0 +1,5 @@
+--readme          README.md
+--default-return  ""
+--title           "Win32-Loquendo Documentation"
+--hide-void-return
+--no-private

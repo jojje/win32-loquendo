@@ -8,16 +8,14 @@ module Win32
 
     ###
     # Reads text out loud or to file using the Loquendo TTS engine.
-    # To perform simultaneous readings, use threads or multiple processes and create an instance of this class in each.
-    # E.g. 
     class Reader
-    
+
       ###
-      # Constructor that takes optional parameters as a hash. The following
-      # parameters can be overridden:
-      # +:sample_rate+ = 32000       # Hz
-      # +:channels+    = 2           # Stereo or mono, 2 or 1 channel
-      # +:voice+       = "Elisabeth"
+      # @param [Hash] opts options to be used as default configuration.
+      # @option opts [Integer] :sample_rate (32000) in Hz.
+      # @option opts [Integer] :channels (2) denotes Stereo or mono, 2 or 1 channel.
+      # @option opts [String]  :voice (Elisabeth) default voice to use unless
+      #                              overridden when calling {#say} or {#write}.
       def initialize(opts={})
         @opts = {
           :sample_rate => 32000,
@@ -44,16 +42,16 @@ module Win32
         @reader_ptr = ptr.read_pointer
         @reader_ptr.freeze
 
-        # Register a callback for speaking so we know when speeches end, since 
+        # Register a callback for speaking so we know when speeches end, since
         # we're interacting with the TTS engine asynchronously in order to avoid
-        # blocking the entire main thread while speaking is going on. 
+        # blocking the entire main thread while speaking is going on.
         @callback = FFI::Function.new(:void, [:uint, :int, :pointer, :pointer]) do |speech_id, event, *ignore|
           if event == 1
             @speaking = false
             info "End of speech ##{speech_id}"
           end
         end
-        
+
         unless LoqTTS7.ttsSetCallback(@reader_ptr, @callback, nil, 0) == 0
           raise LoquendoException, "Failed to register TTS reading callback"
         end
@@ -62,8 +60,10 @@ module Win32
 
       ###
       # Writes +text+ spoken with +voice+ to +filename+.
-      # Optional parmeter: +voice+ which defaults to whatever voice was
-      # specified during the creation of the Reader object.
+      # @param [String] filename to write the PCM WAV data to.
+      # @param [String,#read] text to be rendered to audio.
+      # @param [String] voice defaults to whatever voice was
+      #   specified during the creation of the Reader object.
       def write(filename, text, voice = @opts[:voice])
         device = "LTTS7AudioFile"
         load_voice(voice)
@@ -75,13 +75,13 @@ module Win32
 
       ###
       # Speaks the provided +text+ using +voice+ through the sound card.
-      # If a block is provided, the spoken WAVE-data is handed as a string of 
+      # If a block is provided, the spoken WAVE-data is handed as a string of
       # bytes to the block instead of being sent to the sound card.
-      #
-      # Optional parmeter: +voice+ which defaults to whatever voice was
-      # specified during the creation of the Reader object.
+      # @param [String,#read] text to be spoken.
+      # @param [String] voice uses whatever voice wasspecified during the
+      #   creation of the Reader object unless overridden.
       def say(text, voice = @opts[:voice])
-        if block_given? 
+        if block_given?
           data = nil
           Dir.mktmpdir("loquendo_audio") do |dir|
             file = File.join(dir,"spoken_text.wav")
@@ -93,9 +93,10 @@ module Win32
           say_aloud(text, voice)
         end
       end
-                        
+
       ###
-      # Returns a list of the installed voices, that can be used for speaking
+      # Returns a list of the installed voices, that can be used for speaking.
+      # @return [Array<String>]
       def voices
         buff = FFI::MemoryPointer.new(:string, 1024)
         unless LoqTTS7.ttsQuery(nil, 1, "Id", nil, buff, buff.size, false, false) == 0
@@ -103,7 +104,7 @@ module Win32
         end
         buff.read_string.split(";")
       end
-            
+
       private #################################################################
 
       def say_aloud(text, voice = @opts[:voice])
@@ -116,6 +117,7 @@ module Win32
       end
 
       def render_speech(text, device)
+        text = text.read if text.respon_to? :read
         unless LoqTTS7.ttsRead(@reader_ptr, text, true, false, 0) == 0
           raise LoquendoException, "Failed to playing audio via #{device} library"
         end
@@ -138,8 +140,9 @@ module Win32
 
     end # Reader
 
-    class LoquendoException < Exception; end
-
+    # Custom exception used for this library
+    class LoquendoException < Exception
+    end
 
     ###########################################################################
     private ###################################################################
@@ -158,6 +161,7 @@ module Win32
 
     raise LoquendoException, "Failed to find Loquendo TTS engine. Is the program installed?" unless defined?(DLL_PATH)
 
+    # @private
     module LoqTTS7
       extend FFI::Library
       ffi_lib "#{DLL_PATH}bin\\LoqTTS7"
@@ -180,7 +184,7 @@ module Win32
       #                                     reader
       #attach_function :ttsStop,          [ :pointer ], :int  # Causes nasty hang in Ruby, probably GIL related..
     end
-    
+
   end # Loquendo
-  
+
 end #Win32
