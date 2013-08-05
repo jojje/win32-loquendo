@@ -1,7 +1,6 @@
 require 'ffi'
 require 'win32/registry'
 require 'tempfile'
-require 'thread'
 
 module Win32
   module Loquendo
