@@ -94,8 +94,8 @@ module Win32
       end
 
       ###
-      # Returns a list of the installed voices, that can be used for speaking.
-      # @return [Array<String>]
+      # @return [Array<String>] a list of the installed voices, that can be
+      #                         used for speaking.
       def voices
         buff = FFI::MemoryPointer.new(:string, 1024)
         unless LoqTTS7.ttsQuery(nil, 1, "Id", nil, buff, buff.size, false, false) == 0
