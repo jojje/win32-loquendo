@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Win32::Loquendo::VERSION
   spec.authors       = ["Jonas Tingeborn"]
   spec.email         = ["tinjon@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Ruby for the Win32 API of Loquendo speech synthesis programs}
+  spec.summary       = %q{Ruby API for Loquendo speech synthesis}
   spec.homepage      = ""
   spec.license       = "MIT"
 
