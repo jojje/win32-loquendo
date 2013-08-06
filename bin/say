@@ -10,7 +10,7 @@ def usage
        "  -h        show this help text",
        "  -l        lists the available voices",
        "  -s N      sample rate in Hz",
-       "  -v voice  is the voice to use for speaking"
+       "  -v voice  is the voice to use for speaking (default: #{Win32::Loquendo::Reader.default_voice})"
   exit(1)
 end
 

@@ -98,4 +98,9 @@ To speak a phrase with the default voice, it's as easy as
 
     say My PC can now speak, just like my Mac!
 
+You can also change the default voice, so you don't have to provide the `-v` 
+option all the time. To change the default voice, create the file 
+"`%HOME%/.win32-loquendo`" and enter the voice you want to use on the first 
+line in that file.
+
 [*]: http://en.wikipedia.org/wiki/X-SAMPA   

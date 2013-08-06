@@ -15,13 +15,17 @@ module Win32
       # @option opts [Integer] :channels (2) denotes Stereo or mono, 2 or 1 channel.
       # @option opts [String]  :voice (Elisabeth) default voice to use unless
       #                              overridden when calling {#say} or {#write}.
+      # @note To change the default voice, create the file "%HOME%/.win32-loquendo"
+      #       and enter the voice you want to use on the first line.
       def initialize(opts={})
         @opts = {
           :sample_rate => 32000,
           :channels    => 2,
-          :voice       => "Elizabeth"
+          :voice       => self.class.default_voice
         }.merge(opts)
         @speaking = false
+
+        info "using voice: #{@opts[:voice]}"
 
         # Sanity checking of input parameters
         unless @opts[:sample_rate].kind_of?(Integer) && @opts[:sample_rate] > 0
@@ -102,6 +106,15 @@ module Win32
           raise LoquendoException, "Failed to query voices"
         end
         buff.read_string.split(";")
+      end
+
+      def self.default_voice
+        fn = ENV['HOME'] + "./.win32-loquendo"
+        if File.exists?(fn)
+          File.readlines(fn).first.strip
+        else
+          "Elizabeth"
+        end
       end
 
       private #################################################################
