@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+require 'win32/loquendo'
+
+def usage
+  puts "Usage: #{File.basename $0} [OPTIONS] [TEXT]","",
+       "TEXT is the text you want to be spoken","",
+       "Options:",
+       "  -c (1|2)  audio channels to use",
+       "  -f FILE   write audio to FILE instead of speaking it aloud",
+       "  -h        show this help text",
+       "  -l        lists the available voices",
+       "  -s N      sample rate in Hz",
+       "  -v voice  is the voice to use for speaking"
+  exit(1)
+end
+
+def parse_opts
+  h = {:text=>[], :cmd=>:speak, :channels=>2, :sample_rate=>32000, :file=>nil}
+  while arg = ARGV.shift
+    case arg
+    when /^-(h|\?)/i then usage
+    when '-l' then h[:cmd]         = :list
+    when '-c' then h[:channels]    = ARGV.shift.to_i
+    when '-s' then h[:sample_rate] = ARGV.shift.to_i
+    when '-v' then h[:voice]       = ARGV.shift
+    else
+      h[:text] << arg
+    end
+  end
+  h[:text] = h[:text].flatten.join(" ")
+  h
+end
+
+usage if ARGV.empty?
+opts = parse_opts
+
+trap(:INT){ exit(1) }
+
+reader = Win32::Loquendo::Reader.new(opts)
+if opts[:cmd] == :list
+  puts reader.voices.join(", ")
+else
+  if opts[:file]
+    reader.write(opts[:file], opts[:text])
+  else
+    reader.say(opts[:text])
+  end
+end

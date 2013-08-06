@@ -2,6 +2,9 @@
 
 Ruby interface to the Loquendo speech synthesis (text to speech / TTS) program.
 
+It also ships a command line utility `say` which allows you to get spoken
+text directly from the console.
+
 This gem only runs on Microsoft Windows as it relies both on the Win32 API as 
 well as the DLL files used by the Loquendo distribution. For that reason it 
 has been name spaced in the win32 module to make it abundantly clear which
@@ -16,7 +19,7 @@ platform it supports.
 
     $ gem install win32-loquendo
 
-## Usage
+## API usage
 
 Basic example showing the three types of use
 
@@ -74,5 +77,25 @@ A note of caution: Only ever interact with a reader from one and the same thread
 If used from different threads it will cause undefined behavior (errors, 
 hangs, crashes), since the library interact with C-code over FFI and such 
 interactions are not thread safe.
+
+## Command line usage
+
+The command line program is named `say`
+
+    Usage: say [OPTIONS] [TEXT]
+    
+    TEXT is the text you want to be spoken
+    
+    Options:
+      -c (1|2)  audio channels to use
+      -f FILE   write audio to FILE instead of speaking it aloud
+      -h        show this help text
+      -l        lists the available voices
+      -s N      sample rate in Hz
+      -v voice  is the voice to use for speaking
+
+To speak a phrase with the default voice, it's as easy as
+
+    say My PC can now speak, just like my Mac!
 
 [*]: http://en.wikipedia.org/wiki/X-SAMPA   
