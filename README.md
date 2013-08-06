@@ -84,7 +84,8 @@ The command line program is named `say`
 
     Usage: say [OPTIONS] [TEXT]
     
-    TEXT is the text you want to be spoken
+    TEXT is the text you want to be spoken.
+    If no text is provided as arguments, text will be fetched from STDIN instead.
     
     Options:
       -c (1|2)  audio channels to use
