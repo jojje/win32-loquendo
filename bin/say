@@ -3,7 +3,8 @@ require 'win32/loquendo'
 
 def usage
   puts "Usage: #{File.basename $0} [OPTIONS] [TEXT]","",
-       "TEXT is the text you want to be spoken","",
+       "TEXT is the text you want to be spoken.",
+       "If no text is provided as arguments, text will be fetched from STDIN instead.","",
        "Options:",
        "  -c (1|2)  audio channels to use",
        "  -f FILE   write audio to FILE instead of speaking it aloud",
@@ -31,8 +32,8 @@ def parse_opts
   h
 end
 
-usage if ARGV.empty?
 opts = parse_opts
+opts[:text] = STDIN if opts[:text].empty?
 
 trap(:INT){ exit(1) }
 
