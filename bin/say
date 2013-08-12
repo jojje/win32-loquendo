@@ -11,19 +11,22 @@ def usage
        "  -h        show this help text",
        "  -l        lists the available voices",
        "  -s N      sample rate in Hz",
-       "  -v voice  is the voice to use for speaking (default: #{Win32::Loquendo::Reader.default_voice})"
+       "  -v voice  is the voice to use for speaking (default: #{Win32::Loquendo::Reader.default_voice})",
+       "  -V        verbose, displays the voice used"
   exit(1)
 end
 
 def parse_opts
-  h = {:text=>[], :cmd=>:speak, :channels=>2, :sample_rate=>32000, :file=>nil}
+  h = {:text=>[], :cmd=>:speak, :channels=>2, :sample_rate=>32000, :file=>nil, :voice=>Win32::Loquendo::Reader.default_voice}
   while arg = ARGV.shift
     case arg
     when /^-(h|\?)/i then usage
     when '-l' then h[:cmd]         = :list
     when '-c' then h[:channels]    = ARGV.shift.to_i
     when '-s' then h[:sample_rate] = ARGV.shift.to_i
+    when '-f' then h[:file]        = ARGV.shift
     when '-v' then h[:voice]       = ARGV.shift
+    when '-V' then h[:verbose]     = true
     else
       h[:text] << arg
     end
@@ -32,15 +35,27 @@ def parse_opts
   h
 end
 
+def error(msg)
+  puts msg
+  exit(1)
+end
+
 opts = parse_opts
 opts[:text] = STDIN if opts[:text].empty?
 
 trap(:INT){ exit(1) }
 
+if opts[:voice]
+  v = Win32::Loquendo::Reader.voices.find{|s| s.downcase.index(opts[:voice].downcase) }
+  error "No such voice: #{opts[:voice]}" unless v
+  opts[:voice] = v
+end
+
 reader = Win32::Loquendo::Reader.new(opts)
 if opts[:cmd] == :list
   puts reader.voices.join(", ")
 else
+  puts "Using voice: #{v}" if opts[:verbose]
   if opts[:file]
     reader.write(opts[:file], opts[:text])
   else
