@@ -101,6 +101,10 @@ module Win32
       # @return [Array<String>] a list of the installed voices, that can be
       #                         used for speaking.
       def voices
+        self.class.voices
+      end
+
+      def self.voices
         buff = FFI::MemoryPointer.new(:string, 1024)
         unless LoqTTS7.ttsQuery(nil, 1, "Id", nil, buff, buff.size, false, false) == 0
           raise LoquendoException, "Failed to query voices"
