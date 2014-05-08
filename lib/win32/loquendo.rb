@@ -1,6 +1,11 @@
 require 'ffi'
 require 'win32/registry'
 require 'tempfile'
+begin
+  require 'highline/system_extensions'
+rescue Gem::LoadError
+  # not installed
+end
 
 module Win32
   module Loquendo
@@ -133,7 +138,12 @@ module Win32
       end
 
       def render_speech(text, device)
-        text = text.read if text.respond_to? :read
+        if text == STDIN && text.tty? && Object.const_defined?('HighLine')
+          text = read_unbuffered(text)
+        elsif text.respond_to?(:read)
+          text = text.read
+        end
+        text = break_long_lines(text)
         unless LoqTTS7.ttsRead(@reader_ptr, text, true, false, 0) == 0
           raise LoquendoException, "Failed to playing audio via #{device} library"
         end
@@ -141,6 +151,52 @@ module Win32
         while @speaking   # "soft-block" for the speaking duration
           sleep(0.01)
         end
+      end
+
+      # Workaround for [windows] console, where only about 100 chars can be
+      # entered / buffered for each line before the console hangs. Highline
+      # allows us to use infinitely long lines.
+      def read_unbuffered(io)
+        h = HighLine::SystemExtensions
+        s = ""
+        while true
+          c = h.get_character
+          case c
+          when 3 then exit(1)   # ^C
+          when 4,26 then break  # ^D or ^Z
+          when 8                # BACKSPACE
+            print "\b \b"
+            s.chop!
+          when 10,13            # CR or LF
+            puts
+            s << "\n"
+          else
+            print c.chr
+            s << c
+          end
+        end
+        s
+      end
+
+      # Loquendo API doesn't support lines longer than 135 characters
+      def break_long_lines(s, maxlen=120)
+        lines = []
+        line = ""
+        s.split.each do |word|
+          if line.length + word.length + 1 > maxlen
+            lines << line unless line.empty?
+            while word.length > maxlen  # A single word is longer than allowed
+              segments = word.scan(/.{1,#{maxlen}}/)
+              lines << segments.shift
+              word = segments.join
+            end
+            line = word
+          else
+            line << (line.empty? ? word : " #{word}")
+          end
+        end
+        lines << line
+        lines.join("\n")
       end
 
       def load_voice(voice)
