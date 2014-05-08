@@ -3,7 +3,7 @@ require 'win32/registry'
 require 'tempfile'
 begin
   require 'highline/system_extensions'
-rescue Gem::LoadError
+rescue LoadError
   # not installed
 end
 
